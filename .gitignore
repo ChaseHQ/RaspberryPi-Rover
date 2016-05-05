@@ -1,3 +1,7 @@
+#additional Ignore
+Debug/
+*.vsp
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
