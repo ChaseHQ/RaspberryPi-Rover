@@ -1,6 +1,6 @@
 #include "Win32RoverClient.h"
 
-Win32RoverClient::Win32RoverClient(HINSTANCE hInstance) : __hInstance(hInstance) {
+Win32RoverClient::Win32RoverClient(HINSTANCE hInstance) : __hInstance(hInstance), __rnc(this) {
 	_initializeMainWindow();
 }
 
@@ -20,9 +20,9 @@ void Win32RoverClient::_initializeMainWindow() {
 	__hWindow = CreateWindow("Win32RoverClient","Win32RoverClient",0,0,0,0,0,HWND_MESSAGE,NULL,__hInstance,NULL);
 
 	if (!__hWindow) {
-		__log.log("Could Not Create Win32RoverClient Message Window");
+		log("Could Not Create Win32RoverClient Message Window");
 	} else {
-		__log.log("Win32RoverClient Message Handler Active");
+		log("Win32RoverClient Message Handler Active");
 	}
 
 	SetWindowLongPtr(__hWindow,GWLP_USERDATA,reinterpret_cast<LONG>(this));
@@ -37,11 +37,11 @@ void Win32RoverClient::run() {
 		DispatchMessage(&msg);
 	}
 
-	__log.log("Win32RoverClient::run() Ending");
+	log("Win32RoverClient::run() Ending");
 }
 
 void Win32RoverClient::_createMainForm() {
-	__mainForm.reset (new Win32MainForm(&__log,this) );
+	__mainForm.reset (new Win32MainForm(this) );
 }
 
 LRESULT CALLBACK Win32RoverClient::RoverWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -55,10 +55,22 @@ LRESULT CALLBACK Win32RoverClient::RoverWindowProc(HWND hwnd, UINT uMsg, WPARAM 
 }
 
 void Win32RoverClient::onMainWindowClose() {
-	__log.log("Win32RoverClient::onMainWindowClose() Called");
+	log("Win32RoverClient::onMainWindowClose() Called");
 	PostQuitMessage(0);
 }
 
 HWND Win32RoverClient::getParent() {
 	return __hWindow;
+}
+
+void Win32RoverClient::log(const char * message) {
+	__log.log(message);
+}
+
+void Win32RoverClient::onClientConnect() {
+
+}
+
+void Win32RoverClient::onClientDisconnect() {
+
 }

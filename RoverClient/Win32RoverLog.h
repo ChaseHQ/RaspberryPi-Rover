@@ -3,14 +3,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "ILogger.h"
-
 #include "resource.h"
 
 #ifndef __WIN32ROVERLOG__
 #define __WIN32ROVERLOG__
 
-class Win32RoverLog : public ILogger {
+class Win32RoverLog {
 public:
 	Win32RoverLog();
 	~Win32RoverLog();
