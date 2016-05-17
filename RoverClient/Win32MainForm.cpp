@@ -1,17 +1,19 @@
 #include "Win32MainForm.h"
 
-Win32MainForm::Win32MainForm(ILogger * logger, IAppDelegate * appDelegate) : __log(logger), __appDelegate(appDelegate) {
+#include "Win32InputRequest.h"
+
+Win32MainForm::Win32MainForm(IAppDelegate * appDelegate) : __appDelegate(appDelegate) {
 	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),appDelegate->getParent(),reinterpret_cast<DLGPROC>(MainFormProc));
 	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
-	logger->log("Win32MainForm::Win32MainForm() Instantiated");
+	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
 }
 
 Win32MainForm::~Win32MainForm() {
-	__log->log("Win32MainForm::~Win32MainForm() Destroyed");
+	__appDelegate->log("Win32MainForm::~Win32MainForm() Destroyed");
 }
 
 void Win32MainForm::_MainFormClose() {
-	__log->log("Win32MainForm::MainFormClose() Closing Main Form");
+	__appDelegate->log("Win32MainForm::MainFormClose() Closing Main Form");
 	EndDialog(__hdlg,0);
 	__appDelegate->onMainWindowClose();
 }
@@ -39,5 +41,15 @@ void Win32MainForm::_MenuItemClick(UINT MenuItem) {
 	case ID_ROVER_EXIT:
 		_MainFormClose();
 		break;
+	case ID_ROVER_CONNECT:
+		Win32InputRequest request(__hdlg, std::string("Rover IP Address"), [&](bool okPressed, const std::string &inputString) {
+			if (okPressed)
+				this->_ConnectToRover(inputString);
+		});
+		break;
 	}
+}
+
+void Win32MainForm::_ConnectToRover(const std::string &ipAddress) {
+	
 }

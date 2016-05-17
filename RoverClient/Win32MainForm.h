@@ -1,6 +1,6 @@
 #include <Windows.h>
+#include <string>
 
-#include "ILogger.h"
 #include "IAppDelegate.h"
 
 #include "resource.h"
@@ -10,14 +10,14 @@
 
 class Win32MainForm {
 public:
-	Win32MainForm(ILogger * logger, IAppDelegate * appDelegate);
+	Win32MainForm(IAppDelegate * appDelegate);
 	~Win32MainForm();
 protected:
 	static int CALLBACK MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void _MainFormClose(void);
 	void _MenuItemClick(UINT MenuItem);
+	void _ConnectToRover(const std::string &ipAddress);
 private:
-	ILogger * __log;
 	IAppDelegate * __appDelegate;
 	HWND __hdlg;
 };
