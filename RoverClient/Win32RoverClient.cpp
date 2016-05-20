@@ -1,6 +1,6 @@
 #include "Win32RoverClient.h"
 
-Win32RoverClient::Win32RoverClient(HINSTANCE hInstance) : __hInstance(hInstance), __rnc(this) {
+Win32RoverClient::Win32RoverClient(HINSTANCE hInstance) : __hInstance(hInstance), __rnc(*this), __mainForm(*this) {
 	_initializeMainWindow();
 }
 
@@ -41,7 +41,7 @@ void Win32RoverClient::run() {
 }
 
 void Win32RoverClient::_createMainForm() {
-	__mainForm.reset (new Win32MainForm(this) );
+	__mainForm.CreateForm();
 }
 
 LRESULT CALLBACK Win32RoverClient::RoverWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -59,10 +59,6 @@ void Win32RoverClient::onMainWindowClose() {
 	PostQuitMessage(0);
 }
 
-HWND Win32RoverClient::getParent() {
-	return __hWindow;
-}
-
 void Win32RoverClient::log(const char * message) {
 	__log.log(message);
 }
@@ -73,4 +69,8 @@ void Win32RoverClient::onClientConnect() {
 
 void Win32RoverClient::onClientDisconnect() {
 
+}
+
+void Win32RoverClient::requestConnection(const std::string &ipAddress, int port) {
+	__rnc.ConnectToClient(ipAddress,port);
 }

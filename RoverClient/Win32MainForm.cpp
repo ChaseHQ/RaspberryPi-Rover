@@ -2,14 +2,18 @@
 
 #include "Win32InputRequest.h"
 
-Win32MainForm::Win32MainForm(IAppDelegate * appDelegate) : __appDelegate(appDelegate) {
-	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),appDelegate->getParent(),reinterpret_cast<DLGPROC>(MainFormProc));
-	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
-	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
+Win32MainForm::Win32MainForm(IAppDelegate &appDelegate) : __appDelegate(&appDelegate) {
+	
 }
 
 Win32MainForm::~Win32MainForm() {
 	__appDelegate->log("Win32MainForm::~Win32MainForm() Destroyed");
+}
+
+void Win32MainForm::CreateForm() {
+	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),NULL,reinterpret_cast<DLGPROC>(MainFormProc));
+	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
+	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
 }
 
 void Win32MainForm::_MainFormClose() {
@@ -51,5 +55,6 @@ void Win32MainForm::_MenuItemClick(UINT MenuItem) {
 }
 
 void Win32MainForm::_ConnectToRover(const std::string &ipAddress) {
-	
+	//TODO: Make a Display Here to show it connecting - IE Wait Symbol Etc
+	__appDelegate->requestConnection(ipAddress,5000);
 }

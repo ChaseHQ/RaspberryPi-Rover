@@ -16,7 +16,7 @@ public:
 protected:
 	static int CALLBACK InputRequestProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void _SetupInputRequestDialog(HWND hDlg);
-	void _SetReturnParams(bool buttonPressed, std::string response);
+	void _SetReturnParams(bool buttonPressed, const std::string &response);
 private:
 	std::string __title;
 	bool __okPressed;

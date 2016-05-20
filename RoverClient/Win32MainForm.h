@@ -10,8 +10,9 @@
 
 class Win32MainForm {
 public:
-	Win32MainForm(IAppDelegate * appDelegate);
+	Win32MainForm(IAppDelegate &appDelegate);
 	~Win32MainForm();
+	void CreateForm();
 protected:
 	static int CALLBACK MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void _MainFormClose(void);

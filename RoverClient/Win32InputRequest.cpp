@@ -16,7 +16,7 @@ void Win32InputRequest::_SetupInputRequestDialog(HWND hDlg) {
 	SetWindowText(hDlg,__title.c_str());
 }
 
-void Win32InputRequest::_SetReturnParams(bool buttonPressed, std::string response) {
+void Win32InputRequest::_SetReturnParams(bool buttonPressed,const std::string &response) {
 	__returnString = response;
 	__okPressed = buttonPressed;
 	EndDialog(__hdlg,0);

@@ -1,5 +1,6 @@
 #include <Windows.h>
-#include <boost\shared_ptr.hpp>
+#include <boost\smart_ptr.hpp>
+#include <string>
 
 #include "Win32RoverLog.h"
 #include "IAppDelegate.h"
@@ -16,8 +17,8 @@ public:
 	void run();
 	// IAppDelegate
 	void onMainWindowClose();
-	HWND getParent(void);
 	void log(const char * message);
+	void requestConnection(const std::string &ipAddress, int port);
 	// IRoverNetworkClientDelegate
 	void onClientConnect();
 	void onClientDisconnect();
@@ -29,7 +30,7 @@ private:
 	HINSTANCE __hInstance;
 	HWND __hWindow;
 	Win32RoverLog __log;
-	boost::shared_ptr<Win32MainForm> __mainForm;
+	Win32MainForm __mainForm;
 	RoverNetworkClient __rnc;
 };
 
