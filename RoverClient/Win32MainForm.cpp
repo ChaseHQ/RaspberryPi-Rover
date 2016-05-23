@@ -12,8 +12,15 @@ void Win32MainForm::CreateForm() {
 	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),NULL,reinterpret_cast<DLGPROC>(MainFormProc));
 	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
 	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
-	RECT r = {0,0,50,50};
-	__waitSpinner.CreateControl(__hdlg,r);
+	RECT r;
+	GetClientRect(__hdlg, &r);
+	r.top = (r.bottom / 2) - (246 / 2);
+	r.left = (r.right / 2) - (246 / 2);
+	r.right = 246;
+	r.bottom = 246;
+	__waitSpinner.SetImageFromResourceName(IDR_WAIT);
+	__waitSpinner.CreateControl(__hdlg,r); // Create Wait Spinner Centered
+	__waitSpinner.StartAnimating(50);
 }
 
 void Win32MainForm::_MainFormClose() {

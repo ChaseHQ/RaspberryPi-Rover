@@ -24,29 +24,37 @@ void Win32CustomControl::CreateControl(const HWND &parent, const RECT &bounds) {
 	__hwnd = CreateWindow(__CLASSNAME.c_str(),NULL, WS_CHILD | WS_VISIBLE, bounds.left,bounds.top,bounds.right,bounds.bottom,parent,NULL,GetModuleHandle(NULL),NULL);
 	SetWindowLongPtr(__hwnd,GWLP_USERDATA,reinterpret_cast<LONG>(this));
 	__hwParent = parent;
-	__bounds = bounds;
 }
 
 LRESULT CALLBACK Win32CustomControl::Win32CustomControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	Win32CustomControl * refClass = reinterpret_cast<Win32CustomControl*>(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 	switch (uMsg) {
 	case WM_ACTIVATE:
-		refClass->onActivate();
+		if (refClass->onActivate())
+			return 0;
 		break;
 	case WM_DESTROY:
-		refClass->onDestroy();
+		if (refClass->onDestroy())
+			return 0;
 		break;
 	case WM_KILLFOCUS:
-		refClass->onKillFocus();
+		if (refClass->onKillFocus())
+			return 0;
 		break;
 	case WM_SETFOCUS:
-		refClass->onSetFocus();
+		if (refClass->onSetFocus())
+			return 0;
 		break;
 	case WM_PAINT:
 		PAINTSTRUCT ps;
 		BeginPaint(hwnd,&ps);
-		refClass->onPaint(hwnd,ps);
+		if (refClass->onPaint(hwnd, ps))
+			return 0;
 		EndPaint(hwnd,&ps);
+		break;
+	case WM_TIMER:
+		if (refClass->onTimer(wParam))
+			return 0;
 		break;
 	}
 	return DefWindowProc(hwnd,uMsg,wParam,lParam);
@@ -71,8 +79,10 @@ void Win32CustomControl::__destroyWndClass() {
 const HWND& Win32CustomControl::_getParentWindow() {
 	return __hwParent;
 }
-const RECT& Win32CustomControl::_getBounds() {
-	return __bounds;
+const RECT Win32CustomControl::_getBounds() {
+	RECT r;
+	GetClientRect(_getWindow(), &r);
+	return r;
 }
 
 const HWND& Win32CustomControl::_getWindow() {

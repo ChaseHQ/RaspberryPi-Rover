@@ -86,4 +86,9 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\general-loader.gif">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
