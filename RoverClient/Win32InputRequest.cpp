@@ -1,10 +1,9 @@
 #include "Win32InputRequest.h"
 
-Win32InputRequest::Win32InputRequest(HWND owner, const std::string &title, std::function<void(bool okPressed, const std::string &inputString)> inputReturn) :
-	__title(title), __returnString(""), __okPressed(false)
+Win32InputRequest::Win32InputRequest(HWND owner, const std::string &title, std::function<bool(bool okPressed, const std::string &inputString,const HWND &dlgHandle)> inputReturn) :
+	__title(title), __inputReturn(inputReturn)
 {
 	DialogBoxParam(NULL,MAKEINTRESOURCE(IDD_INPUTREQ),owner,reinterpret_cast<DLGPROC>(InputRequestProc),reinterpret_cast<LPARAM>(this));
-	inputReturn(__okPressed,__returnString);
 }
 
 Win32InputRequest::~Win32InputRequest() {
@@ -17,9 +16,8 @@ void Win32InputRequest::_SetupInputRequestDialog(HWND hDlg) {
 }
 
 void Win32InputRequest::_SetReturnParams(bool buttonPressed,const std::string &response) {
-	__returnString = response;
-	__okPressed = buttonPressed;
-	EndDialog(__hdlg,0);
+	if (__inputReturn(buttonPressed,response,__hdlg))
+		EndDialog(__hdlg,0);
 }
 
 int CALLBACK Win32InputRequest::InputRequestProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -31,7 +29,6 @@ int CALLBACK Win32InputRequest::InputRequestProc(HWND hDlg, UINT uMsg, WPARAM wP
 			ShowWindow(hDlg,SW_SHOW);
 			break;
 		case WM_CLOSE:
-			
 			break;
 		case WM_COMMAND:
 			std::vector<char> buffer(Edit_GetTextLength(GetDlgItem(hDlg,IDC_IR_EDIT))+1);

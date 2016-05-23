@@ -82,12 +82,16 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RoverNetworkClient.cpp" />
+    <ClCompile Include="Win32CustomControl.cpp" />
+    <ClCompile Include="Win32GifAnimation.cpp" />
     <ClCompile Include="Win32InputRequest.cpp" />
     <ClCompile Include="Win32MainForm.cpp" />
     <ClCompile Include="Win32RoverClient.cpp" />
     <ClCompile Include="Win32RoverLog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Win32CustomControl.h" />
+    <ClInclude Include="Win32GifAnimation.h" />
     <ClInclude Include="Win32InputRequest.h" />
     <ClInclude Include="ILog.h" />
     <ClInclude Include="IAppDelegate.h" />

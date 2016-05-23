@@ -1,7 +1,5 @@
 #include "Win32MainForm.h"
 
-#include "Win32InputRequest.h"
-
 Win32MainForm::Win32MainForm(IAppDelegate &appDelegate) : __appDelegate(&appDelegate) {
 	
 }
@@ -14,6 +12,8 @@ void Win32MainForm::CreateForm() {
 	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),NULL,reinterpret_cast<DLGPROC>(MainFormProc));
 	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
 	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
+	RECT r = {0,0,50,50};
+	__waitSpinner.CreateControl(__hdlg,r);
 }
 
 void Win32MainForm::_MainFormClose() {
@@ -46,15 +46,37 @@ void Win32MainForm::_MenuItemClick(UINT MenuItem) {
 		_MainFormClose();
 		break;
 	case ID_ROVER_CONNECT:
-		Win32InputRequest request(__hdlg, std::string("Rover IP Address"), [&](bool okPressed, const std::string &inputString) {
-			if (okPressed)
-				this->_ConnectToRover(inputString);
+		Win32InputRequest request(__hdlg, std::string("Rover IP Address"), [&](bool okPressed, const std::string &inputString, const HWND &dlgHandle)->bool {
+			if (okPressed) {
+				// Error Check that this is an IP address -
+				boost::system::error_code ec;
+				boost::asio::ip::address_v4::from_string(inputString,ec);
+				if (ec.value()) {
+					MessageBox(dlgHandle,"This is an invalid IP Address","IP Address",MB_ICONERROR);
+					return false;
+				} else 
+					this->_ConnectToRover(inputString);
+			}
+			return true;
 		});
 		break;
 	}
 }
 
 void Win32MainForm::_ConnectToRover(const std::string &ipAddress) {
-	//TODO: Make a Display Here to show it connecting - IE Wait Symbol Etc
+	_SetStateConnecting();
 	__appDelegate->requestConnection(ipAddress,5000);
+}
+
+void Win32MainForm::_SetStateDisconnected() {
+
+}
+
+void Win32MainForm::_SetStateConnected() {
+
+}
+
+void Win32MainForm::_SetStateConnecting() {
+	_SetStateDisconnected();
+
 }

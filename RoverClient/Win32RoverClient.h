@@ -1,3 +1,5 @@
+#include "Win32MainForm.h"
+
 #include <Windows.h>
 #include <boost\smart_ptr.hpp>
 #include <string>
@@ -5,7 +7,6 @@
 #include "Win32RoverLog.h"
 #include "IAppDelegate.h"
 #include "RoverNetworkClient.h"
-#include "Win32MainForm.h"
 
 #ifndef __WIN32ROVERCLIENT__
 #define __WIN32ROVERCLIENT__
