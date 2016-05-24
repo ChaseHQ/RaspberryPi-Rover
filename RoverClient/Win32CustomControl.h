@@ -10,7 +10,9 @@
 class Win32CustomControl {
 public:
 	~Win32CustomControl();
-	void CreateControl(const HWND &parent, const RECT &bounds); 
+	void CreateControl(const HWND &parent, const RECT &bounds);
+	void SetVisible(bool visible);
+	bool GetVisible();
 protected:
 	Win32CustomControl(const char * className);
 	static LRESULT CALLBACK Win32CustomControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -24,6 +26,7 @@ protected:
 	virtual bool onSetFocus() { return false; };
 	virtual bool onKillFocus() { return false; };
 	virtual bool onTimer(const WPARAM& wParam) { return false; };
+	virtual bool onShowWindow(bool windowShown) { return false; };
 private:
 	std::mutex __mtx;
 	static std::atomic_uint __CLASSCOUNT;
@@ -32,6 +35,7 @@ private:
 	void __destroyWndClass();
 	HWND __hwnd;
 	HWND __hwParent;
+	bool __visible;
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "Win32GifAnimation.h"
 
-Win32GifAnimation::Win32GifAnimation() : __currentFrame(0), __numFrames(0), __image(nullptr), Win32CustomControl("Win32GifAnimation") {
+Win32GifAnimation::Win32GifAnimation() : __elapse(0), __isAnimating(false), __currentFrame(0), __numFrames(0), __image(nullptr), Win32CustomControl("Win32GifAnimation") {
 	GdiplusStartupInput si;
 	GdiplusStartup(&__gdiplusToken,&si,NULL);
 }
@@ -49,14 +49,30 @@ void Win32GifAnimation::SetImageFromResourceName(const WORD wResource) {
 
 void Win32GifAnimation::StartAnimating(UINT elapse) {
 	UINT ptr = SetTimer(_getWindow(), 100, elapse, NULL);
+	__isAnimating = true;
+	__elapse = elapse;
 }
 
 void Win32GifAnimation::StopAnimating() {
 	KillTimer(_getWindow(), 100);
+	__isAnimating = false;
 }
 
 bool Win32GifAnimation::onTimer(const WPARAM& wParam) {
 	InvalidateRect(_getWindow(), &_getBounds(), true);
 	if (++__currentFrame == (__numFrames - 1)) __currentFrame = 0;
 	return true;
+}
+
+bool Win32GifAnimation::onShowWindow(bool windowVisible) {
+	_pauseAnimation(!windowVisible);
+	return true;
+}
+
+void Win32GifAnimation::_pauseAnimation(bool pause) {
+	if (IsAnimating() && pause) {
+		KillTimer(_getWindow(), 100);
+	} else if (IsAnimating() && !pause) {
+		SetTimer(_getWindow(), 100, __elapse, NULL);
+	}
 }

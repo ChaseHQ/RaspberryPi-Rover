@@ -19,8 +19,9 @@ void Win32MainForm::CreateForm() {
 	r.right = 246;
 	r.bottom = 246;
 	__waitSpinner.SetImageFromResourceName(IDR_WAIT);
-	__waitSpinner.CreateControl(__hdlg,r); // Create Wait Spinner Centered
+	__waitSpinner.CreateControl(__hdlg,r);
 	__waitSpinner.StartAnimating(50);
+	__waitSpinner.SetVisible(false);
 }
 
 void Win32MainForm::_MainFormClose() {
@@ -49,6 +50,15 @@ int CALLBACK Win32MainForm::MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
 
 void Win32MainForm::_MenuItemClick(UINT MenuItem) {
 	switch (MenuItem) {
+	case ID_DEBUG_HIDEANIMATION:
+		__waitSpinner.SetVisible(!__waitSpinner.GetVisible());
+		break;
+	case ID_DEBUG_PAUSEANIMATION:
+		if (__waitSpinner.IsAnimating())
+			__waitSpinner.StopAnimating();
+		else
+			__waitSpinner.StartAnimating(50);
+		break;
 	case ID_ROVER_EXIT:
 		_MainFormClose();
 		break;

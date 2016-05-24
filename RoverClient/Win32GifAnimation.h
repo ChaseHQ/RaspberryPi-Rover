@@ -24,14 +24,19 @@ public:
 	void SetImageFromResourceName(const WORD wResource);
 	void StartAnimating(UINT elapse);
 	void StopAnimating();
+	bool IsAnimating() { return __isAnimating; };
 protected:
 	bool onPaint(const HWND& hWnd, const PAINTSTRUCT& ps);
 	bool onTimer(const WPARAM& wParam);
+	bool onShowWindow(bool windowVisible);
+	void _pauseAnimation(bool pause);
 private:
 	ULONG_PTR __gdiplusToken;
 	Image * __image;
 	WORD __numFrames;
 	WORD __currentFrame;
+	UINT __elapse;
+	bool __isAnimating;
 };
 
 #endif

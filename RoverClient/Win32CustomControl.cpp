@@ -2,7 +2,7 @@
 
 std::atomic_uint Win32CustomControl::__CLASSCOUNT;
 
-Win32CustomControl::Win32CustomControl(const char * className) : __hwnd(NULL), __CLASSNAME(className) {
+Win32CustomControl::Win32CustomControl(const char * className) : __visible(true), __hwnd(NULL), __CLASSNAME(className) {
 	__mtx.lock();
 	if (__CLASSCOUNT++ == 0) {
 		// Initialize WNDClass 
@@ -28,34 +28,40 @@ void Win32CustomControl::CreateControl(const HWND &parent, const RECT &bounds) {
 
 LRESULT CALLBACK Win32CustomControl::Win32CustomControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	Win32CustomControl * refClass = reinterpret_cast<Win32CustomControl*>(GetWindowLongPtr(hwnd,GWLP_USERDATA));
-	switch (uMsg) {
-	case WM_ACTIVATE:
-		if (refClass->onActivate())
-			return 0;
-		break;
-	case WM_DESTROY:
-		if (refClass->onDestroy())
-			return 0;
-		break;
-	case WM_KILLFOCUS:
-		if (refClass->onKillFocus())
-			return 0;
-		break;
-	case WM_SETFOCUS:
-		if (refClass->onSetFocus())
-			return 0;
-		break;
-	case WM_PAINT:
-		PAINTSTRUCT ps;
-		BeginPaint(hwnd,&ps);
-		if (refClass->onPaint(hwnd, ps))
-			return 0;
-		EndPaint(hwnd,&ps);
-		break;
-	case WM_TIMER:
-		if (refClass->onTimer(wParam))
-			return 0;
-		break;
+	if (refClass) {
+		switch (uMsg) {
+		case WM_SHOWWINDOW:
+			if (refClass->onShowWindow(wParam))
+				return 0;
+			break;
+		case WM_ACTIVATE:
+			if (refClass->onActivate())
+				return 0;
+			break;
+		case WM_DESTROY:
+			if (refClass->onDestroy())
+				return 0;
+			break;
+		case WM_KILLFOCUS:
+			if (refClass->onKillFocus())
+				return 0;
+			break;
+		case WM_SETFOCUS:
+			if (refClass->onSetFocus())
+				return 0;
+			break;
+		case WM_PAINT:
+			PAINTSTRUCT ps;
+			BeginPaint(hwnd, &ps);
+			if (refClass->onPaint(hwnd, ps))
+				return 0;
+			EndPaint(hwnd, &ps);
+			break;
+		case WM_TIMER:
+			if (refClass->onTimer(wParam))
+				return 0;
+			break;
+		}
 	}
 	return DefWindowProc(hwnd,uMsg,wParam,lParam);
 }
@@ -87,4 +93,13 @@ const RECT Win32CustomControl::_getBounds() {
 
 const HWND& Win32CustomControl::_getWindow() {
 	return __hwnd;
+}
+
+void Win32CustomControl::SetVisible(bool visible) {
+	ShowWindow(_getWindow(), (visible) ? SW_SHOW : SW_HIDE);
+	__visible = visible;
+}
+
+bool Win32CustomControl::GetVisible() {
+	return __visible;
 }
