@@ -33,6 +33,22 @@ void Win32RoverClient::_initializeMainWindow() {
 void Win32RoverClient::run() {
 	MSG msg;
 	while (GetMessage(&msg,NULL,NULL,NULL)) {
+		/* Dialog Boxes do not recieve WM_KEYDOWN or WM_KEYUP
+		   So we have to process this message here and send it
+		   Up to our dialog box - Dialog boxes also do not 
+		   recieve messages about their button states - They
+		   DO recieve the command but do not get notified of 
+		   State change - so we look for Mouse L downs and Ups
+		   and poll the button state based on that            */
+		if ((msg.message == WM_KEYDOWN && !(msg.lParam & 0x40000000)) || (msg.message == WM_KEYUP && (msg.lParam & 0x40000000))) { 
+			if (__mainForm.KeyMessage(msg, (msg.message == WM_KEYDOWN ? true : false))){
+				__mainForm.PollButtonStates();
+				continue;
+			}
+		}
+		else if (msg.message == WM_LBUTTONDOWN || msg.message == WM_LBUTTONDBLCLK || msg.message == WM_LBUTTONUP) {
+			__mainForm.PollButtonStates();
+		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -56,6 +72,7 @@ LRESULT CALLBACK Win32RoverClient::RoverWindowProc(HWND hwnd, UINT uMsg, WPARAM 
 
 void Win32RoverClient::onMainWindowClose() {
 	log("Win32RoverClient::onMainWindowClose() Called");
+	requestDisconnect();
 	PostQuitMessage(0);
 }
 
@@ -63,14 +80,27 @@ void Win32RoverClient::log(const char * message) {
 	__log.log(message);
 }
 
-void Win32RoverClient::onClientConnect() {
+void Win32RoverClient::onClientConnecting() {
+	__mainForm.SetStateConnecting();
+}
 
+void Win32RoverClient::onClientConnect() {
+	__mainForm.SetStateConnected();
 }
 
 void Win32RoverClient::onClientDisconnect() {
+	__mainForm.SetStateDisconnected();
+}
 
+void Win32RoverClient::onFailedToConnect() {
+	__mainForm.SetStateFailedToConnect();
 }
 
 void Win32RoverClient::requestConnection(const std::string &ipAddress, int port) {
 	__rnc.ConnectToClient(ipAddress,port);
+}
+
+void Win32RoverClient::requestDisconnect() {
+	if (__rnc.isConnected())
+		__rnc.Disconnect();
 }

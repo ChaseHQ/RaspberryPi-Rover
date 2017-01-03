@@ -45,6 +45,7 @@ void Win32GifAnimation::SetImageFromResourceName(const WORD wResource) {
 	__image->GetFrameDimensionsList(dId, 1);
 	__numFrames = __image->GetFrameCount(dId);
 
+	stream->Release();
 }
 
 void Win32GifAnimation::StartAnimating(UINT elapse) {

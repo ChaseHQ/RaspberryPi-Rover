@@ -90,5 +90,20 @@
     <Image Include="resources\general-loader.gif">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\assets\up.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\assets\down.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\assets\left.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\assets\right.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\assets\horn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

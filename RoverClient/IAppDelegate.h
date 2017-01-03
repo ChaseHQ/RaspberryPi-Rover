@@ -10,6 +10,7 @@ class IAppDelegate : public ILog {
 public:
 	virtual void onMainWindowClose(void) = 0;
 	virtual void requestConnection(const std::string &ipAddress, int port) = 0;
+	virtual void requestDisconnect() = 0;
 };
 
 #endif

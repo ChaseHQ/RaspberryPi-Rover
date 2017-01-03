@@ -20,18 +20,24 @@ public:
 	Win32MainForm(IAppDelegate &appDelegate);
 	~Win32MainForm();
 	void CreateForm();
+	void SetStateDisconnected();
+	void SetStateConnected();
+	void SetStateConnecting();
+	void SetStateFailedToConnect();
+	bool KeyMessage(const MSG &msg, bool keyDown);
+	void PollButtonStates();
 protected:
 	static int CALLBACK MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void _MainFormClose(void);
 	void _MenuItemClick(UINT MenuItem);
 	void _ConnectToRover(const std::string &ipAddress);
-	void _SetStateDisconnected();
-	void _SetStateConnected();
-	void _SetStateConnecting();
+	IStream * _StreamFromResource(UINT uiResource, const LPCSTR lpLocation);
+	void _AssignIconToButton(UINT uiButtonId, UINT uiIconName, const LPCSTR lpIconLocation);
 private:
 	IAppDelegate * __appDelegate;
 	HWND __hdlg;
 	Win32GifAnimation __waitSpinner;
+	bool __stateConnected;
 };
 
 #endif

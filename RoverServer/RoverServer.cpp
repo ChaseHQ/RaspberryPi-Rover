@@ -73,7 +73,7 @@ void CRoverServer::_recieveThread() {
 	__recieveThreadRunning = true;
 	__rmsg.StartQueueProcessing();
 	system::error_code error;
-	while (error != asio::error::eof && error != asio::error::operation_aborted && error != asio::error::connection_aborted) {
+	while (error != asio::error::eof && error != asio::error::operation_aborted && error != asio::error::connection_aborted && error != asio::error::connection_reset) {
 		boost::array<unsigned char, sizeof(ROVERMESSAGE)> buffer;
 		size_t lenRec = read(*_serverSocket,asio::buffer(buffer,sizeof(ROVERMESSAGE)),error);
 		if (lenRec == sizeof(ROVERMESSAGE)) {

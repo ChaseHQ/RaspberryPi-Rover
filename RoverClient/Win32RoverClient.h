@@ -20,9 +20,12 @@ public:
 	void onMainWindowClose();
 	void log(const char * message);
 	void requestConnection(const std::string &ipAddress, int port);
+	void requestDisconnect();
 	// IRoverNetworkClientDelegate
 	void onClientConnect();
 	void onClientDisconnect();
+	void onFailedToConnect();
+	void onClientConnecting();
 protected:
 	void _initializeMainWindow();
 	void _createMainForm();

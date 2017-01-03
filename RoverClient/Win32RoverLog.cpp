@@ -28,6 +28,8 @@ void Win32RoverLog::log(const char * LogMsg) {
 	Edit_SetText(GetDlgItem(__hdlg,IDC_LOGBOX),stringBuf.str().c_str()); // Set the String in
 
 	Edit_Scroll(GetDlgItem(__hdlg,IDC_LOGBOX),Edit_GetLineCount(GetDlgItem(__hdlg,IDC_LOGBOX)),0); // Scroll to the last row
+
+	free(buffer);
 }
 
 int CALLBACK Win32RoverLog::DebugBoxProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {

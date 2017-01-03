@@ -48,7 +48,12 @@ struct ROVERMESSAGE {
 		ver = msg->ver;
 		cmd = msg->cmd;
 		data.val = msg->data.val;
-	}
+	};
+	ROVERMESSAGE (const unsigned char command) {
+		ver = ROVERMESSAGE_VERSION;
+		cmd = cmd;
+		data.val = 0;
+	};
 	unsigned char ver;
 	unsigned char cmd;
 	word data;
