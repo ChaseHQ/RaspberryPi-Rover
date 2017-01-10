@@ -11,26 +11,28 @@
 #include <iostream>
 
 #include "RoverMessenger.h"
+#include "IRoverExecuterDelegate.h"
 
 #ifndef __ROVERSERVER__
 #define __ROVERSERVER__
 
 using namespace boost;
 
-class CRoverServer
+class CRoverServer : public IRoverExecuterDelegate
 {
 public:
 	CRoverServer();
 	~CRoverServer(void);
-
 	void startServer(int port);
 	bool isServerRunning();
 	void shutdownServer();
 	void serverTick();
+	void sendResponseMessage(const ROVERMESSAGE& rm);
 protected:
 	void _recieveThread();
 	void _startShutdown();
 	void _acceptConnection(const system::error_code& ec);
+	void _dataWriteHandler(const system::error_code& ec, std::size_t bytes_sent);
 	thread _threadRecieve;
 	thread _threadIOService;
 	shared_ptr<asio::ip::tcp::socket> _serverSocket;

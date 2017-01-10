@@ -43,11 +43,15 @@ void Win32RoverClient::run() {
 		if ((msg.message == WM_KEYDOWN && !(msg.lParam & 0x40000000)) || (msg.message == WM_KEYUP && (msg.lParam & 0x40000000))) { 
 			if (__mainForm.KeyMessage(msg, (msg.message == WM_KEYDOWN ? true : false))){
 				__mainForm.PollButtonStates();
-				continue;
 			}
 		}
+		/* The following is hack - windows will pass this message before the button actually depresses
+			so it's up to us to get it and press the button before we poll the button states*/
 		else if (msg.message == WM_LBUTTONDOWN || msg.message == WM_LBUTTONDBLCLK || msg.message == WM_LBUTTONUP) {
-			__mainForm.PollButtonStates();
+			msg.wParam = VK_LBUTTON;
+			if (__mainForm.KeyMessage(msg, (msg.message == WM_LBUTTONUP ? false : true))) {
+				__mainForm.PollButtonStates();
+			}
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -103,4 +107,17 @@ void Win32RoverClient::requestConnection(const std::string &ipAddress, int port)
 void Win32RoverClient::requestDisconnect() {
 	if (__rnc.isConnected())
 		__rnc.Disconnect();
+}
+
+void Win32RoverClient::commandRequest(const ROVERMESSAGE &rm) {
+	if (!__rnc.isConnected()) return;
+	__rnc.sendRoverCommand(rm);
+}
+
+void Win32RoverClient::onMessageRecieve(const ROVERMESSAGE &rm) {
+	switch (rm.cmd) {
+	case ROVER_RESPONSE_TRIM:
+		__mainForm.SetTrimSpeed(rm.data.sWord.high, rm.data.sWord.low);
+		break;
+	}
 }

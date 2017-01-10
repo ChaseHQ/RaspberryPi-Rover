@@ -1,6 +1,6 @@
 #include "RoverExecuter.h"
 
-RoverExecuter::RoverExecuter() : __leftSpeedTrim(103), __rightSpeedTrim(127), __currentMovement(ROVER_STOP), __requestedMovement(ROVER_STOP) {
+RoverExecuter::RoverExecuter(IRoverExecuterDelegate * roverExecuterDelegate) : __leftSpeedTrim(103), __rightSpeedTrim(127), __currentMovement(ROVER_STOP), __requestedMovement(ROVER_STOP), __roverExecuterDelegate(roverExecuterDelegate) {
   wiringPiSetup();
   wiringPiSPISetup(0,1000000);
 
@@ -53,7 +53,19 @@ void RoverExecuter::ProcessRoverMessage(const ROVERMESSAGE &msg) {
 	case ROVER_SETTRIM:
 		SetTrimSpeed(msg.data.sWord.high,msg.data.sWord.low);
 		break;
+	case ROVER_GETTRIM:
+		_SendTrimSpeed();
+		break;
 	}
+}
+
+void RoverExecuter::_SendTrimSpeed() {
+	std::cout << "RoverExecuter::_SendTrimSpeed() Requested" << std::endl;
+	ROVERMESSAGE rm;
+	rm.cmd = ROVER_RESPONSE_TRIM;
+	rm.data.sWord.high = __leftSpeedTrim;
+	rm.data.sWord.low = __rightSpeedTrim;
+	__roverExecuterDelegate->sendResponseMessage(rm);
 }
 
 void RoverExecuter::RoverStop() {
@@ -147,6 +159,7 @@ void RoverExecuter::SetTrimSpeed(unsigned int leftTrim, unsigned int rightTrim) 
 	if (rightTrim > 127) rightTrim = 127;
 	__leftSpeedTrim = leftTrim;
 	__rightSpeedTrim = rightTrim;
+	std::cout << "RoverExecuter::SetTrimSpeed(leftTrim,rightTrim) Set Left: " << leftTrim << " Set Right: " << rightTrim << std::endl;
 }
 
 float RoverExecuter::GetDistance() {

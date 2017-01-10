@@ -46,6 +46,7 @@ void RoverNetworkClient::_recieveThread() {
 			// size matches - legit message
 			ROVERMESSAGE rm((ROVERMESSAGE *)buffer.data());
 			// Do something with the message
+			__rncDelegate->onMessageRecieve(rm);
 		}
 	}
 	__connected = false;
@@ -55,11 +56,22 @@ void RoverNetworkClient::_recieveThread() {
 }
 
 void RoverNetworkClient::Disconnect() {
-	if (!__connected) return;
+	if (!isConnected()) return;
 	__rncDelegate->log("RoverNetworkClient::Disconnect() - Disconnect Request Issued");
 	_clientSocket->close();
 }
 
 bool RoverNetworkClient::isConnected() {
 	return __connected;
+}
+
+void RoverNetworkClient::sendRoverCommand(const ROVERMESSAGE& rm) {
+	if (!isConnected()) return;
+	__rncDelegate->log("Sending Data To Rover...");
+	asio::async_write(*_clientSocket, asio::buffer(&rm, sizeof(ROVERMESSAGE)), bind(&RoverNetworkClient::_dataWriteHandler, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+}
+
+void RoverNetworkClient::_dataWriteHandler(const system::error_code& ec, std::size_t bytes_sent) {
+	// Implement Errors on send...
+	__rncDelegate->log((std::string("RoverNetworkClient::_dataWriteHandler() - BytesSent: ") + std::to_string(bytes_sent) + std::string(" Message: ") + ec.message()).c_str());
 }

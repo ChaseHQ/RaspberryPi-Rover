@@ -7,6 +7,7 @@
 
 #include "RoverCommands.h"
 #include "RoverExecuter.h"
+#include "IRoverExecuterDelegate.h"
 
 #ifndef __ROVERMESSENGER__
 #define __ROVERMESSENGER__
@@ -15,7 +16,7 @@ using namespace boost;
 
 class RoverMessenger {
 public:
-	RoverMessenger();
+	RoverMessenger(IRoverExecuterDelegate * roverExecuterDelegate);
 	~RoverMessenger();
 	void AddMessage(const ROVERMESSAGE &msg);
 	void StartQueueProcessing();

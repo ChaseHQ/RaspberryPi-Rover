@@ -21,14 +21,16 @@
 
 #define ROVERMESSAGE_VERSION 0x01
 
-#define ROVER_STOP         0x00
-#define ROVER_LEFT         0x01
-#define ROVER_RIGHT        0x02
-#define ROVER_FORWARD      0x03
-#define ROVER_BACK         0x04
-#define ROVER_HORN         0x05
-#define ROVER_SETTRIM      0x06
-#define ROVER_GETDISTANCE  0x07
+#define ROVER_STOP           0x00
+#define ROVER_LEFT           0x01
+#define ROVER_RIGHT          0x02
+#define ROVER_FORWARD        0x03
+#define ROVER_BACK           0x04
+#define ROVER_HORN           0x05
+#define ROVER_SETTRIM        0x06
+#define ROVER_GETDISTANCE    0x07
+#define ROVER_GETTRIM        0x08
+#define ROVER_RESPONSE_TRIM  0x09
 
 struct _sWord {
   unsigned char low;
@@ -36,6 +38,7 @@ struct _sWord {
 };
   
 union word {
+	word() : val(0) {};
 	_sWord sWord;
 	unsigned int val;
 };

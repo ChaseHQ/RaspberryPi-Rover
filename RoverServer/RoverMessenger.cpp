@@ -1,6 +1,6 @@
 #include "RoverMessenger.h"
 
-RoverMessenger::RoverMessenger() : __queueRunning(false), __stopQueueRequest(false), __lfq(128) {
+RoverMessenger::RoverMessenger(IRoverExecuterDelegate * roverExecuterDelegate) : __queueRunning(false), __stopQueueRequest(false), __lfq(128), __re(roverExecuterDelegate) {
 
 }
 

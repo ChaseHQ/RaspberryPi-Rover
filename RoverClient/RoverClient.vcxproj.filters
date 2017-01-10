@@ -53,9 +53,6 @@
     <ClInclude Include="IAppDelegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoverNetworkClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IRoverNetworkClientDelegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -79,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="Win32GifAnimation.h">
       <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="RoverNetworkClient.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -105,5 +105,8 @@
     <Image Include="..\assets\horn.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

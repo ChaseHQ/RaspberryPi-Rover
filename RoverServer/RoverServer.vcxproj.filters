@@ -47,5 +47,8 @@
     <ClInclude Include="Win32WiringPi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IRoverExecuterDelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

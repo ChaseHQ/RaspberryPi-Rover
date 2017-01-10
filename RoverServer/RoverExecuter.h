@@ -8,6 +8,7 @@
 #include <boost/utility/binary.hpp>
 
 #include "RoverCommands.h"
+#include "IRoverExecuterDelegate.h"
 
 #define uchar unsigned char
 
@@ -16,7 +17,7 @@
 
 class RoverExecuter {
 public:
-	RoverExecuter();
+	RoverExecuter(IRoverExecuterDelegate * roverExecuterDelegate);
 	~RoverExecuter();
 	void InitializeRover(void);
 	void RoverStop(void);
@@ -29,11 +30,13 @@ public:
 	float GetDistance(void);
 	void ProcessRoverMessage(const ROVERMESSAGE &msg);
 protected:
+	void _SendTrimSpeed();
 private:
 	uchar __currentMovement;
 	uchar __requestedMovement;
 	unsigned int __leftSpeedTrim;
 	unsigned int __rightSpeedTrim;
+	IRoverExecuterDelegate * __roverExecuterDelegate;
 };
 
 #endif

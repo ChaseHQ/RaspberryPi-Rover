@@ -1,6 +1,6 @@
 #include "RoverServer.h"
 
-CRoverServer::CRoverServer() : __serverRunning(false), __serverListening(false), __recieveThreadRunning(false), __shuttingDown(false), __shutdownRequest(false) {
+CRoverServer::CRoverServer() : __serverRunning(false), __serverListening(false), __recieveThreadRunning(false), __shuttingDown(false), __shutdownRequest(false), __rmsg(this) {
 	
 }
 
@@ -99,4 +99,15 @@ void CRoverServer::_acceptConnection(const system::error_code& ec) {
 	std::cout << "Recieved Connection from: " << _serverSocket->remote_endpoint().address() << std::endl;
 	__serverListening = false;
 	_threadRecieve = thread(&CRoverServer::_recieveThread,this); // Start Recieve Thread
+}
+
+void CRoverServer::sendResponseMessage(const ROVERMESSAGE& rm) {
+	// Response Writes
+	std::cout << "CRoverServer::sendResponseMessage(const ROVERMESSAGE& rm) - Sending Data to Client" << std::endl;
+	asio::async_write(*_serverSocket, asio::buffer(&rm, sizeof(ROVERMESSAGE)), bind(&CRoverServer::_dataWriteHandler, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+}
+
+void CRoverServer::_dataWriteHandler(const system::error_code& ec, std::size_t bytes_sent) {
+	// Implement Errors on send...
+	std::cout << "CRoverServer::_dataWriteHandler() - BytesSent: " << bytes_sent << " Message: " << ec.message() << std::endl;
 }

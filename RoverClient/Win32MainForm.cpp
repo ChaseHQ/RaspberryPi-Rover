@@ -9,6 +9,11 @@ Win32MainForm::~Win32MainForm() {
 }
 
 void Win32MainForm::CreateForm() {
+	INITCOMMONCONTROLSEX icomex = {};
+	icomex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+	icomex.dwICC = ICC_WIN95_CLASSES;
+	InitCommonControlsEx(&icomex);
+
 	__hdlg = CreateDialog(NULL,MAKEINTRESOURCE(IDD_MAINFORM),NULL,reinterpret_cast<DLGPROC>(MainFormProc));
 	SetWindowLongPtr(__hdlg,GWLP_USERDATA,reinterpret_cast<LONG>(this));
 	__appDelegate->log("Win32MainForm::Win32MainForm() Instantiated");
@@ -28,6 +33,11 @@ void Win32MainForm::CreateForm() {
 	_AssignIconToButton(IDC_BLEFT, IDB_LEFT, "PNG");
 	_AssignIconToButton(IDC_BRIGHT, IDB_RIGHT, "PNG");
 	_AssignIconToButton(IDC_BHORN, IDB_HORN, "PNG");
+
+	SendDlgItemMessage(__hdlg, IDC_LTRIM, TBM_SETRANGEMAX, true, 127);
+	SendDlgItemMessage(__hdlg, IDC_RTRIM, TBM_SETRANGEMAX, true, 127);
+	_TrackBarChange(GetDlgItem(__hdlg, IDC_LTRIM), false);
+	_TrackBarChange(GetDlgItem(__hdlg, IDC_RTRIM), false);
 
 	SetStateDisconnected();
 }
@@ -72,6 +82,16 @@ int CALLBACK Win32MainForm::MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
 		case WM_CLOSE:
 			refDialog->_MainFormClose();
 			break;
+		case WM_VSCROLL:
+			switch LOWORD(wParam) {
+			case TB_ENDTRACK:
+				refDialog->_TrackBarChange(reinterpret_cast<HWND>(lParam), true);
+				break;
+			case TB_THUMBTRACK:
+				refDialog->_TrackBarChange(reinterpret_cast<HWND>(lParam), false);
+				break;
+			}
+			break;
 		case WM_COMMAND:
 			switch (HIWORD(wParam)) {
 			case 0: // Menu
@@ -83,6 +103,25 @@ int CALLBACK Win32MainForm::MainFormProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
 	}
 
 	return false;
+}
+
+void Win32MainForm::_TrackBarChange(HWND hTrackBar, bool bFinal){
+	int tbPos = SendMessage(hTrackBar, TBM_GETPOS, 0, 0);
+	switch (GetWindowLong(hTrackBar, GWL_ID)) {
+	case IDC_LTRIM:
+		SendDlgItemMessage(__hdlg, IDC_LVAL, WM_SETTEXT, 0, reinterpret_cast<LPARAM> (std::to_string(tbPos).c_str()));
+		break;
+	case IDC_RTRIM:
+		SendDlgItemMessage(__hdlg, IDC_RVAL, WM_SETTEXT, 0, reinterpret_cast<LPARAM> (std::to_string(tbPos).c_str()));
+		break;
+	}
+	if (bFinal) {
+		ROVERMESSAGE rm;
+		rm.cmd = ROVER_SETTRIM;
+		rm.data.sWord.high = SendMessage(GetDlgItem(__hdlg,IDC_LTRIM), TBM_GETPOS, 0, 0);
+		rm.data.sWord.low = SendMessage(GetDlgItem(__hdlg, IDC_RTRIM), TBM_GETPOS, 0, 0);
+		__appDelegate->commandRequest(&rm);
+	}
 }
 
 bool Win32MainForm::KeyMessage(const MSG &msg, bool keyDown) {
@@ -108,15 +147,54 @@ bool Win32MainForm::KeyMessage(const MSG &msg, bool keyDown) {
 		Button_SetState(GetDlgItem(__hdlg, IDC_BHORN), keyDown);
 		return true;
 		break;
+	case VK_LBUTTON:
+		// The button state isn't actually down here - We need to make sure that it does show down
+		// once this method ends it will poll the states of the buttons
+		// We need to check to see if the mouse is over the button - then react accordingly
+		for (int butId = 1010; butId <= 1014; ++butId) { // Hacky hack with the resource ID #'s :(
+			if (_IsMouseOverButton(butId)) {
+				Button_SetState(GetDlgItem(__hdlg, butId), keyDown);
+			}
+		}
+		return true;
+		break;
 	}
 	return false;
+}
+
+bool Win32MainForm::_IsMouseOverButton(UINT uiButtonId) {
+	POINT pt;
+	RECT rct;
+	GetCursorPos(&pt);
+	GetWindowRect(GetDlgItem(__hdlg, uiButtonId), &rct);
+	return PtInRect(&rct, pt);
 }
 
 void Win32MainForm::PollButtonStates() {
 	// This is called when there could possibly be a change in button state - Check and act on
 	if (!__stateConnected) return; // Make sure we are actually connected
-
 	__appDelegate->log("Poll Button State Requested");
+	auto roverMessage = boost::shared_ptr<ROVERMESSAGE>(new ROVERMESSAGE());
+	if (Button_GetState(GetDlgItem(__hdlg, IDC_BDOWN)) & BST_PUSHED){
+		roverMessage->cmd = ROVER_BACK;
+	}
+	else if (Button_GetState(GetDlgItem(__hdlg, IDC_BUP)) & BST_PUSHED) {
+		roverMessage->cmd = ROVER_FORWARD;
+	}
+	else if (Button_GetState(GetDlgItem(__hdlg, IDC_BLEFT)) & BST_PUSHED) {
+		roverMessage->cmd = ROVER_LEFT;
+	}
+	else if (Button_GetState(GetDlgItem(__hdlg, IDC_BRIGHT)) & BST_PUSHED) {
+		roverMessage->cmd = ROVER_RIGHT;
+	}
+	else if (Button_GetState(GetDlgItem(__hdlg, IDC_BHORN)) & BST_PUSHED) {
+		roverMessage->cmd = ROVER_HORN;
+	}
+	else {
+		// No buttons down - must be a stop
+		roverMessage->cmd = ROVER_STOP;
+	}
+	__appDelegate->commandRequest(roverMessage.get());
 }
 
 void Win32MainForm::_MenuItemClick(UINT MenuItem) {
@@ -158,6 +236,13 @@ void Win32MainForm::_ConnectToRover(const std::string &ipAddress) {
 	__appDelegate->requestConnection(ipAddress,5000);
 }
 
+void Win32MainForm::SetTrimSpeed(int iLTrimSpeed, int iRTrimSpeed) {
+	SendDlgItemMessage(__hdlg, IDC_LTRIM, TBM_SETPOS, true, iLTrimSpeed);
+	SendDlgItemMessage(__hdlg, IDC_RTRIM, TBM_SETPOS, true, iRTrimSpeed);
+	_TrackBarChange(GetDlgItem(__hdlg, IDC_LTRIM), false);
+	_TrackBarChange(GetDlgItem(__hdlg, IDC_RTRIM), false);
+}
+
 void Win32MainForm::SetStateDisconnected() {
 	EnableMenuItem(GetMenu(__hdlg), ID_ROVER_CONNECT, MF_ENABLED);
 	EnableMenuItem(GetMenu(__hdlg), ID_ROVER_DISCONNECT, MF_GRAYED);
@@ -166,10 +251,15 @@ void Win32MainForm::SetStateDisconnected() {
 	Button_Enable(GetDlgItem(__hdlg, IDC_BLEFT), false);
 	Button_Enable(GetDlgItem(__hdlg, IDC_BRIGHT), false);
 	Button_Enable(GetDlgItem(__hdlg, IDC_BHORN), false);
+	EnableWindow(GetDlgItem(__hdlg, IDC_LTRIM), false);
+	EnableWindow(GetDlgItem(__hdlg, IDC_RTRIM), false);
 	__stateConnected = false;
 }
 
 void Win32MainForm::SetStateConnected() {
+	// First Retrieve Needed Data from Rover
+	_RequestInitialRoverData();
+	// Now Continue on with giving control to end user
 	EnableMenuItem(GetMenu(__hdlg), ID_ROVER_DISCONNECT, MF_ENABLED);
 	__waitSpinner.SetVisible(false);
 	__waitSpinner.StopAnimating();
@@ -178,7 +268,15 @@ void Win32MainForm::SetStateConnected() {
 	Button_Enable(GetDlgItem(__hdlg, IDC_BLEFT), true);
 	Button_Enable(GetDlgItem(__hdlg, IDC_BRIGHT), true);
 	Button_Enable(GetDlgItem(__hdlg, IDC_BHORN), true);
+	EnableWindow(GetDlgItem(__hdlg, IDC_LTRIM), true);
+	EnableWindow(GetDlgItem(__hdlg, IDC_RTRIM), true);
 	__stateConnected = true;
+}
+
+void Win32MainForm::_RequestInitialRoverData() {
+	ROVERMESSAGE rm;
+	rm.cmd = ROVER_GETTRIM;
+	__appDelegate->commandRequest(rm);
 }
 
 void Win32MainForm::SetStateConnecting() {

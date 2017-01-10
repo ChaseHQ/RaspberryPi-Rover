@@ -7,6 +7,7 @@
 #include <boost/array.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/atomic.hpp>
+#include <cstddef>
 
 #include "IRoverNetworkClientDelegate.h"
 #include "../RoverServer/RoverCommands.h"
@@ -25,6 +26,7 @@ public:
 	void ConnectToClient(const std::string &ipAddress, int port);
 	void Disconnect();
 	bool isConnected();
+	void sendRoverCommand(const ROVERMESSAGE& rm);
 protected:
 	asio::io_service _aios;
 	shared_ptr<asio::ip::tcp::socket> _clientSocket;
@@ -32,6 +34,7 @@ protected:
 	IRoverNetworkClientDelegate * __rncDelegate;
 	void _connectHandler(const system::error_code& er);
 	void _recieveThread();
+	void _dataWriteHandler(const system::error_code& ec, std::size_t bytes_sent);
 private:
 	thread _threadIOService;
 	thread _threadRecieveThread;
